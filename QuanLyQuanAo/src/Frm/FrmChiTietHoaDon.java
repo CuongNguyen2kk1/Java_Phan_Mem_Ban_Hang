@@ -1,0 +1,534 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Frm;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author Hai Nguyen
+ */
+public class FrmChiTietHoaDon extends javax.swing.JPanel {
+
+    /**
+     * Creates new form FrmChiTietHoaDon
+     */
+    DefaultTableModel tbn = new DefaultTableModel();
+    public FrmChiTietHoaDon() throws SQLException {
+        initComponents();
+        loadComboboxSanPham();
+        loadDataChiTietHoaDon();
+        loadComboboxMaHoaDon();
+    }
+    public void loadComboboxSanPham() {
+        try {
+            Connect a = new Connect();
+            Connection conn = a.getConnection();
+            PreparedStatement ps = conn.prepareStatement("select TenSanPham from SanPham group by TenSanPham ");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                cbbSanPham.addItem(rs.getString("TenSanPham"));
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+        }
+    }
+    public void loadComboboxMaHoaDon() {
+        try {
+            Connect a = new Connect();
+            Connection conn = a.getConnection();
+            PreparedStatement ps = conn.prepareStatement("select MaHoaDon from HoaDon ");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                cbbMaHoaDon.addItem(rs.getString("MaHoaDon"));
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+        }
+    }
+    public void SetTongTien(String MaHoaDon) throws SQLException {
+         Connect a = new Connect();
+         Connection conn = a.getConnection();
+         Statement st = conn.createStatement();
+         ResultSet rs = st.executeQuery("select sum(ChiTietHoaDon.TongTien) as TongTienHienTai,HoaDon.MaHoaDon from HoaDon,ChiTietHoaDon "
+                + "where HoaDon.MaHoaDon=ChiTietHoaDon.MaHoaDon"
+                + " and HoaDon.MaHoaDon=" + MaHoaDon + "group by HoaDon.MaHoaDon");
+        String ttht = "";
+
+        try {
+            if (rs.next()) {
+                ttht = rs.getString("TongTienHienTai");
+                String ctv = "update HoaDon set TongTien= " + ttht + "where MaHoaDon=" + MaHoaDon;
+                ResultSet ra = st.executeQuery(ctv);
+                loadDataChiTietHoaDon();
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+        }
+    }
+    public void SetTonKho(String TenSanPham) throws SQLException {
+         Connect a = new Connect();
+         Connection conn = a.getConnection();
+         Statement st = conn.createStatement();
+         st.executeUpdate("update SanPham set TonKho = (select Sum(SoLuong)  from ChiTietPhieuNhap where MaSanPham =(select MaSanPham from SanPham where TenSanPham = N'"+ TenSanPham +"')) - (select Sum(SoLuong)  from ChiTietHoaDon where MaSanPham = (select MaSanPham from SanPham where TenSanPham = N'"+ TenSanPham +"')) where TenSanPham = N'"+ TenSanPham +"'");
+    }
+    private void loadDataChiTietHoaDon() throws SQLException {
+            Connect a = new Connect();
+            Connection conn = a.getConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery("select MaCTHD, HoaDon.MaHoaDon, SanPham.TenSanPham, ChiTietHoaDon.SoLuong, ChiTietHoaDon.TongTien from HoaDon,ChiTietHoaDon,SanPham where  SanPham.MaSanPham=ChiTietHoaDon.MaSanPham and HoaDon.MaHoaDon=ChiTietHoaDon.MaHoaDon " );
+            Object[] obj = new Object[]{"Mã CTDH", "Mã Hóa Đơn", "Sản Phẩm", "Số Lượng", "Tổng Tiền"};
+            DefaultTableModel tableModel = new DefaultTableModel(obj, 0);
+            tblChiTietHoaDon.setModel(tableModel);
+            int c = 0;
+            try {
+                while (rs.next()) {
+                    c++;
+                    Object[] item = new Object[7];
+                    item[0] = rs.getInt("MaCTHD");
+                    item[1] = rs.getInt("MaHoaDon");
+                    item[2] = rs.getString("TenSanPham");
+                    item[3] = rs.getInt("SoLuong");
+                    item[4] = rs.getInt("TongTien");
+                    tableModel.addRow(item);
+                }
+            } catch (SQLException ex) {
+                System.out.println(ex.toString());
+            }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jScrollPane15 = new javax.swing.JScrollPane();
+        tblChiTietHoaDon = new javax.swing.JTable();
+        jLabel34 = new javax.swing.JLabel();
+        jPanel19 = new javax.swing.JPanel();
+        lblMaCTHD = new javax.swing.JLabel();
+        lblSoLuong_CTPM = new javax.swing.JLabel();
+        lblMaHoaDon = new javax.swing.JLabel();
+        jLabel40 = new javax.swing.JLabel();
+        txtTongTien = new javax.swing.JTextField();
+        cbbSanPham = new javax.swing.JComboBox<>();
+        txtMaCTHD = new javax.swing.JTextField();
+        btnThem_ChiTietHoaDon = new javax.swing.JButton();
+        btnXoa_ChiTietHoaDon = new javax.swing.JButton();
+        btnSua_ChiTietHoaDon = new javax.swing.JButton();
+        btnReset_ChiTietHoaDon = new javax.swing.JButton();
+        jLabel57 = new javax.swing.JLabel();
+        txtSoLuong = new javax.swing.JTextField();
+        cbbMaHoaDon = new javax.swing.JComboBox<>();
+
+        setBackground(new java.awt.Color(255, 255, 255));
+
+        tblChiTietHoaDon.setBackground(new java.awt.Color(255, 204, 204));
+        tblChiTietHoaDon.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Mã CTHD", "Mã Hóa Đơn", "Sản Phẩm", "Số Lượng", "Tổng Tiền"
+            }
+        ));
+        tblChiTietHoaDon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblChiTietHoaDonMouseClicked(evt);
+            }
+        });
+        jScrollPane15.setViewportView(tblChiTietHoaDon);
+        if (tblChiTietHoaDon.getColumnModel().getColumnCount() > 0) {
+            tblChiTietHoaDon.getColumnModel().getColumn(0).setMinWidth(100);
+            tblChiTietHoaDon.getColumnModel().getColumn(0).setPreferredWidth(100);
+            tblChiTietHoaDon.getColumnModel().getColumn(0).setMaxWidth(100);
+        }
+
+        jLabel34.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel34.setForeground(new java.awt.Color(0, 102, 102));
+        jLabel34.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel34.setText("Bảng Chi Tiết Hóa Đơn");
+
+        jPanel19.setBackground(new java.awt.Color(153, 255, 255));
+        jPanel19.setPreferredSize(new java.awt.Dimension(400, 230));
+
+        lblMaCTHD.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        lblMaCTHD.setText("Mã CTHD:");
+
+        lblSoLuong_CTPM.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        lblSoLuong_CTPM.setText("Số Lượng:");
+
+        lblMaHoaDon.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        lblMaHoaDon.setText("Mã Hóa Đơn:");
+
+        jLabel40.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel40.setText("Sản Phẩm:");
+
+        txtTongTien.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtTongTienActionPerformed(evt);
+            }
+        });
+
+        cbbSanPham.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbSanPhamItemStateChanged(evt);
+            }
+        });
+
+        txtMaCTHD.setEditable(false);
+        txtMaCTHD.setBackground(new java.awt.Color(204, 204, 204));
+
+        btnThem_ChiTietHoaDon.setBackground(new java.awt.Color(255, 255, 255));
+        btnThem_ChiTietHoaDon.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnThem_ChiTietHoaDon.setForeground(new java.awt.Color(0, 102, 102));
+        btnThem_ChiTietHoaDon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/Add_16x16.png"))); // NOI18N
+        btnThem_ChiTietHoaDon.setText("Thêm");
+        btnThem_ChiTietHoaDon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThem_ChiTietHoaDonActionPerformed(evt);
+            }
+        });
+
+        btnXoa_ChiTietHoaDon.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnXoa_ChiTietHoaDon.setForeground(new java.awt.Color(0, 102, 102));
+        btnXoa_ChiTietHoaDon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/Delete_16x16.png"))); // NOI18N
+        btnXoa_ChiTietHoaDon.setText("Xóa");
+        btnXoa_ChiTietHoaDon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoa_ChiTietHoaDonActionPerformed(evt);
+            }
+        });
+
+        btnSua_ChiTietHoaDon.setBackground(new java.awt.Color(255, 255, 255));
+        btnSua_ChiTietHoaDon.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnSua_ChiTietHoaDon.setForeground(new java.awt.Color(0, 102, 102));
+        btnSua_ChiTietHoaDon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/Edit_16x16.png"))); // NOI18N
+        btnSua_ChiTietHoaDon.setText("Sửa");
+        btnSua_ChiTietHoaDon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSua_ChiTietHoaDonActionPerformed(evt);
+            }
+        });
+
+        btnReset_ChiTietHoaDon.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnReset_ChiTietHoaDon.setForeground(new java.awt.Color(0, 102, 102));
+        btnReset_ChiTietHoaDon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/Refresh_16x16.png"))); // NOI18N
+        btnReset_ChiTietHoaDon.setText("Reset");
+        btnReset_ChiTietHoaDon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReset_ChiTietHoaDonActionPerformed(evt);
+            }
+        });
+
+        jLabel57.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel57.setText("Tổng Tiền:");
+
+        txtSoLuong.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtSoLuongKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSoLuongKeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel19Layout = new javax.swing.GroupLayout(jPanel19);
+        jPanel19.setLayout(jPanel19Layout);
+        jPanel19Layout.setHorizontalGroup(
+            jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel19Layout.createSequentialGroup()
+                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel19Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel19Layout.createSequentialGroup()
+                                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(lblMaCTHD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(lblMaHoaDon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtMaCTHD)
+                                    .addComponent(cbbMaHoaDon, 0, 199, Short.MAX_VALUE)))
+                            .addGroup(jPanel19Layout.createSequentialGroup()
+                                .addComponent(jLabel57, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtTongTien))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel19Layout.createSequentialGroup()
+                        .addGap(48, 48, 48)
+                        .addComponent(btnThem_ChiTietHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(28, 28, 28)
+                        .addComponent(btnSua_ChiTietHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel19Layout.createSequentialGroup()
+                        .addGap(100, 100, 100)
+                        .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel40, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblSoLuong_CTPM, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(cbbSanPham, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtSoLuong, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel19Layout.createSequentialGroup()
+                        .addGap(17, 17, 17)
+                        .addComponent(btnXoa_ChiTietHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(56, 56, 56)
+                        .addComponent(btnReset_ChiTietHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(70, Short.MAX_VALUE))
+        );
+        jPanel19Layout.setVerticalGroup(
+            jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel19Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblMaCTHD, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMaCTHD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel40, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbbSanPham, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblMaHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblSoLuong_CTPM, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSoLuong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbbMaHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel57)
+                    .addComponent(txtTongTien, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnThem_ChiTietHoaDon)
+                    .addComponent(btnXoa_ChiTietHoaDon)
+                    .addComponent(btnReset_ChiTietHoaDon)
+                    .addComponent(btnSua_ChiTietHoaDon))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel19, javax.swing.GroupLayout.DEFAULT_SIZE, 711, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel34, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane15, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 711, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel34)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane15, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel19, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
+                .addGap(12, 12, 12))
+        );
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void tblChiTietHoaDonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblChiTietHoaDonMouseClicked
+        int viTriDongVuaBam = tblChiTietHoaDon.getSelectedRow();
+        txtMaCTHD.setText(tblChiTietHoaDon.getValueAt(viTriDongVuaBam, 0).toString());
+        cbbMaHoaDon.setSelectedItem(tblChiTietHoaDon.getModel().getValueAt(tblChiTietHoaDon.getSelectedRow(), 1));
+        txtSoLuong.setText(tblChiTietHoaDon.getValueAt(viTriDongVuaBam, 3).toString());
+        txtTongTien.setText(tblChiTietHoaDon.getValueAt(viTriDongVuaBam, 4).toString());
+        cbbSanPham.setSelectedItem(tblChiTietHoaDon.getModel().getValueAt(tblChiTietHoaDon.getSelectedRow(), 2));
+        
+    }//GEN-LAST:event_tblChiTietHoaDonMouseClicked
+
+    private void txtTongTienActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTongTienActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtTongTienActionPerformed
+
+    private void cbbSanPhamItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbbSanPhamItemStateChanged
+
+    }//GEN-LAST:event_cbbSanPhamItemStateChanged
+
+    private void btnThem_ChiTietHoaDonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThem_ChiTietHoaDonActionPerformed
+        try {
+            StringBuilder sb = new StringBuilder();
+            if(txtMaCTHD.getText().equals("")){
+                if(txtSoLuong.getText().equals("")){
+                    sb.append("Hãy Nhập Số Lượng!");
+                }
+                else if(txtTongTien.getText().equals("")){
+                    sb.append("Hãy Nhập Tổng Tiền!");
+                }
+                else{
+                    Connect a = new Connect();
+                    Connection conn = a.getConnection();
+                    String MaHoaDon;
+                    String TenSanPham;
+                    MaHoaDon = cbbMaHoaDon.getSelectedItem().toString();
+                    TenSanPham = cbbSanPham.getSelectedItem().toString();
+                    PreparedStatement ps = conn.prepareStatement("insert into ChiTietHoaDon(MaHoaDon, MaSanPham, SoLuong, TongTien) values(?,(Select MaSanPham from SanPham where TenSanPham=?),?,?)");
+                    ps.setString(1,cbbMaHoaDon.getSelectedItem().toString());
+                    ps.setString(2,cbbSanPham.getSelectedItem().toString());
+                    ps.setString(3,txtSoLuong.getText()); 
+                    ps.setString(4,txtTongTien.getText());
+                    int chk = ps.executeUpdate();
+                    if(chk>0){
+                        sb.append("Thêm thành công!");
+                        loadDataChiTietHoaDon();
+                        SetTongTien(MaHoaDon);
+                        SetTonKho(TenSanPham);
+                    }
+                }
+            }
+            else{
+                sb.append("Hãy Nhấn Reset Trước Khi Thêm");
+            }
+            if (sb.length() > 0) {
+                JOptionPane.showMessageDialog(this, sb.toString());
+                return;
+            }
+
+            JOptionPane.showMessageDialog(this, sb.toString());
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+        }
+        
+    }//GEN-LAST:event_btnThem_ChiTietHoaDonActionPerformed
+
+    private void btnXoa_ChiTietHoaDonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoa_ChiTietHoaDonActionPerformed
+        try {
+            StringBuilder sb= new StringBuilder();
+            if(txtMaCTHD.getText().equals("")){
+                sb.append("Hãy click vào Chi Tiết Hóa Đơn Bạn muốn xóa !");
+            }
+            else{
+                Connect a = new Connect();
+                Connection conn = a.getConnection();
+                String MaHoaDon;
+                MaHoaDon = cbbMaHoaDon.getSelectedItem().toString();
+                PreparedStatement pc = conn.prepareStatement("delete ChiTietHoaDon where MaCTHD=?");
+                pc.setString(1, tblChiTietHoaDon.getValueAt(tblChiTietHoaDon.getSelectedRow(),0).toString());
+                if(JOptionPane.showConfirmDialog(this,"Bạn thật sự muốn xóa ?", "Confirm",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+                    pc.executeUpdate();
+                    sb.append("Xóa Thành Công");
+                    loadDataChiTietHoaDon();
+                    SetTongTien(MaHoaDon);
+                }
+            }
+            if (sb.length() > 0) {
+                JOptionPane.showMessageDialog(this, sb.toString());
+                return;
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+        }
+    }//GEN-LAST:event_btnXoa_ChiTietHoaDonActionPerformed
+
+    private void btnSua_ChiTietHoaDonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSua_ChiTietHoaDonActionPerformed
+        try {
+            StringBuilder sb = new StringBuilder();
+            if(txtMaCTHD.getText().equals("")){
+                sb.append("Hãy Chọn Hóa Đơn Bạn Muốn Sửa !");
+            }
+            else{
+                if(txtSoLuong.getText().equals("")){
+                    sb.append("Hãy Nhập Mã Hóa Đơn !");
+                }
+                else if(txtTongTien.getText().equals("")){
+                    sb.append("Hãy Nhập Tổng Tiền !");
+                }
+                else{
+                    Connect a = new Connect();
+                    Connection conn = a.getConnection();
+                    String MaHoaDon;
+                    String TenSanPham;                    
+                    MaHoaDon = cbbMaHoaDon.getSelectedItem().toString();
+                    TenSanPham = cbbSanPham.getSelectedItem().toString();
+                    PreparedStatement pr = conn.prepareStatement("update ChiTietHoaDon set MaHoaDon=?,MaSanPham=(Select MaSanPham from SanPham where TenSanPham=?),SoLuong=?,TongTien=? where MaCTHD=?");
+                    pr.setString(1,cbbMaHoaDon.getSelectedItem().toString());
+                    pr.setString(2,cbbSanPham.getSelectedItem().toString());
+                    pr.setString(3,txtSoLuong.getText());
+                    pr.setString(4,txtTongTien.getText());
+                    pr.setString(5,txtMaCTHD.getText());
+                    pr.executeUpdate();
+                    sb.append("Sửa Thành Công");
+                    loadDataChiTietHoaDon();
+                    SetTongTien(MaHoaDon);
+                    SetTonKho(TenSanPham);
+                }
+            }
+            if (sb.length() > 0) {
+                JOptionPane.showMessageDialog(this, sb.toString());
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+    }//GEN-LAST:event_btnSua_ChiTietHoaDonActionPerformed
+
+    private void btnReset_ChiTietHoaDonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReset_ChiTietHoaDonActionPerformed
+        txtMaCTHD.setText("");
+        cbbSanPham.setSelectedIndex(0);
+        cbbMaHoaDon.setSelectedIndex(0);
+        txtTongTien.setText("");
+        txtSoLuong.setText("");
+    }//GEN-LAST:event_btnReset_ChiTietHoaDonActionPerformed
+
+    private void txtSoLuongKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSoLuongKeyPressed
+
+    }//GEN-LAST:event_txtSoLuongKeyPressed
+
+    private void txtSoLuongKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSoLuongKeyReleased
+
+    }//GEN-LAST:event_txtSoLuongKeyReleased
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnReset_ChiTietHoaDon;
+    private javax.swing.JButton btnSua_ChiTietHoaDon;
+    private javax.swing.JButton btnThem_ChiTietHoaDon;
+    private javax.swing.JButton btnXoa_ChiTietHoaDon;
+    private javax.swing.JComboBox<String> cbbMaHoaDon;
+    private javax.swing.JComboBox<String> cbbSanPham;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel40;
+    private javax.swing.JLabel jLabel57;
+    private javax.swing.JPanel jPanel19;
+    private javax.swing.JScrollPane jScrollPane15;
+    private javax.swing.JLabel lblMaCTHD;
+    private javax.swing.JLabel lblMaHoaDon;
+    private javax.swing.JLabel lblSoLuong_CTPM;
+    private javax.swing.JTable tblChiTietHoaDon;
+    private javax.swing.JTextField txtMaCTHD;
+    private javax.swing.JTextField txtSoLuong;
+    private javax.swing.JTextField txtTongTien;
+    // End of variables declaration//GEN-END:variables
+}
